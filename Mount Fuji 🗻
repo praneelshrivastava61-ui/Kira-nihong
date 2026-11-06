@@ -1,1 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Turbo Car Racing</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background: #111;
+  font-family: Arial;
+  text-align: center;
+  overflow: hidden;
+}
+h2 {
+  color: white;
+  padding: 10px;
+}
+#game {
+  width: 320px;
+  height: 500px;
+  background: #444;
+  margin: auto;
+  position: relative;
+  overflow: hidden;
+  border: 4px solid white;
+}
+.line {
+  position: absolute;
+  width: 8px;
+  height: 60px;
+  background: white;
+  left: 156px;
+}
+.car {
+  position: absolute;
+  width: 45px;
+  height: 75px;
+  border-radius: 10px;
+  background: red;
+  bottom: 20px;
+  left: 137px;
+  border: 4px solid black;
+}
+.enemy {
+  position: absolute;
+  width: 45px;
+  height: 75px;
+  background: blue;
+  border: 4px solid black;
+  border-radius: 10px;
+}
+#score {
+  color: yellow;
+  font-size: 22px;
+  padding: 10px;
+}
+button {
+  padding: 12px 25px;
+  margin: 8px;
+  font-size: 20px;
+  border-radius: 10px;
+}
+</style>
+</head>
+<body>
 
+<h2>🏎️ TURBO RACING</h2>
+<div id="score">Score: 0</div>
+
+<div id="game">
+  <div class="car" id="player"></div>
+</div>
+
+<button onclick="move(-1)">⬅️</button>
+<button onclick="move(1)">➡️</button>
+<br>
+<button onclick="startGame()">START GAME</button>
+
+<script>
+const game = document.getElementById("game");
+const player = document.getElementById("player");
+const scoreText = document.getElementById("score");
+
+let x = 137;
+let score = 0;
+let speed = 5;
+let enemies = [];
+let running = false;
+let animation;
+
+function move(dir) {
+  if (!running) return;
+  x += dir * 45;
+  x = Math.max(5, Math.min(270, x));
+  player.style.left = x + "px";
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft" || e.key === "a")
+    move(-1);
+  if (e.key === "ArrowRight" || e.key === "d")
+    move(1);
+});
+
+function startGame() {
+  cancelAnimationFrame(animation);
+  enemies.forEach(e => e.remove());
+  enemies = [];
+  x = 137;
+  score = 0;
+  speed = 5;
+  running = true;
+  player.style.left = x + "px";
+  scoreText.innerText = "Score: 0";
+  gameLoop();
+}
+
+function gameLoop() {
+  if (!running) return;
+
+  if (Math.random() < 0.025) {
+    let enemy = document.createElement("div");
+    enemy.className = "enemy";
+    enemy.style.left = Math.floor(Math.random() * 6) * 45 + 5 + "px";
+    enemy.style.top = "-80px";
+    game.appendChild(enemy);
+    enemies.push(enemy);
+  }
+
+  enemies.forEach((enemy, i) => {
+    let y = parseFloat(enemy.style.top);
+    y += speed;
+    enemy.style.top = y + "px";
+
+    if (
+      y + 75 > 405 &&
+      y < 480 &&
+      Math.abs(parseInt(enemy.style.left) - x) < 40
+    ) {
+      running = false;
+      alert("GAME OVER! Your score: " + score);
+    }
+
+    if (y > 510) {
+      enemy.remove();
+      enemies.splice(i, 1);
+      score++;
+      scoreText.innerText = "Score: " + score;
+      speed = Math.min(12, 5 + score * 0.1);
+    }
+  });
+
+  if (running)
+    animation = requestAnimationFrame(gameLoop);
+}
+</script>
+</body>
+</html>
